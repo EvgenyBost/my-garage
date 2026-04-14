@@ -1,4 +1,4 @@
-package com.boss.mygarage.ui.theme
+package com.boss.mygarage.presentation.common.theme
 
 import androidx.compose.ui.graphics.Color
 
