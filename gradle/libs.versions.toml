@@ -8,8 +8,8 @@ lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.12.2"
 kotlin = "2.0.21"
 composeBom = "2024.09.00"
-ksp = "2.0.21-1.0.28" # Версия KSP строго под ваш Kotlin
-room = "2.6.1"
+ksp = "2.0.21-1.0.28"
+room = "2.7.0-alpha11"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
