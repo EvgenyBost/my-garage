@@ -3,13 +3,19 @@ package com.boss.mygarage.presentation.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.boss.mygarage.domain.model.Vehicle
-import com.boss.mygarage.domain.usecase.GetAllVehiclesUseCase
+import com.boss.mygarage.domain.usecase.vehicle.DeleteVehicleUseCase
+import com.boss.mygarage.domain.usecase.vehicle.GetAllVehiclesUseCase
+import com.boss.mygarage.domain.usecase.vehicle.GetVehicleByIdUseCase
+import com.boss.mygarage.domain.usecase.vehicle.SaveVehicleUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 
 class MainViewModel(
-    private val getAllVehiclesUseCase: GetAllVehiclesUseCase
+    private val getAllVehiclesUseCase: GetAllVehiclesUseCase,
+    private val getVehicleByIdUseCase: GetVehicleByIdUseCase,
+    private val saveVehicleUseCase: SaveVehicleUseCase,
+    private val deleteVehicleUseCase: DeleteVehicleUseCase,
 ) : ViewModel() {
 
     // Transform Flow from UseCase to StateFlow, to use in Compose.

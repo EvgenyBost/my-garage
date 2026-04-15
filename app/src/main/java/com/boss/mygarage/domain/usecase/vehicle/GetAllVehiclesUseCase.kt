@@ -1,4 +1,4 @@
-package com.boss.mygarage.domain.usecase
+package com.boss.mygarage.domain.usecase.vehicle
 
 import com.boss.mygarage.domain.model.Vehicle
 import com.boss.mygarage.domain.repository.VehicleRepository

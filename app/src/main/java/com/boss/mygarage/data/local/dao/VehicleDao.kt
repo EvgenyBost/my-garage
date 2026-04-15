@@ -22,9 +22,9 @@ interface VehicleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVehicle(vehicle: VehicleEntity)
 
-    @Delete
-    suspend fun deleteVehicle(vehicle: VehicleEntity)
-
     @Update
     suspend fun updateVehicle(vehicle: VehicleEntity)
+
+    @Delete
+    suspend fun deleteVehicle(vehicle: VehicleEntity)
 }

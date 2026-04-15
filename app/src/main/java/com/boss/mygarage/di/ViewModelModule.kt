@@ -5,7 +5,12 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    viewModel { MainViewModel(get()) }
+    viewModel { MainViewModel(
+        getAllVehiclesUseCase = get(),
+        getVehicleByIdUseCase = get(),
+        saveVehicleUseCase = get(),
+        deleteVehicleUseCase = get(),
+    ) }
 
 //    viewModel { (vehicleId: Long) ->
 //        DetailsViewModel(vehicleId, get(), get())

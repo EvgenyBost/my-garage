@@ -10,7 +10,7 @@ val dataModule = module {
     // Create DB singleton
     single {
         Room.databaseBuilder(androidContext(), AppDatabase::class.java, "my_garage.db")
-            .addCallback(DatabaseCallback()) //to add default items into DB and show it on the main screen
+            .addCallback(DatabaseCallback()) //to add default items into DB at the first start and show it on the main screen
             .build()
     }
 

@@ -9,7 +9,7 @@ import androidx.room.*
             entity = VehicleEntity::class,
             parentColumns = ["id"],
             childColumns = ["vehicleId"],
-            onDelete = ForeignKey.CASCADE //When Vehicle delete -> notes deletes automatically
+            onDelete = ForeignKey.CASCADE //When Vehicle delete -> all associated notes deletes automatically
         )
     ],
     indices = [Index("vehicleId")]
