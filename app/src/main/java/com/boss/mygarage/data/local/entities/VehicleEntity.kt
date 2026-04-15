@@ -4,7 +4,11 @@ import androidx.room.*
 
 @Entity (tableName = "vehicles")
 data class VehicleEntity(
-    @PrimaryKey(true) val uid: Int,
-    @ColumnInfo(name = "name") val name: String?,
-    @ColumnInfo(name = "description") val description: String?
+    @PrimaryKey(true) val id: Long = 0,
+    val name: String,
+    val description: String?, //@ColumnInfo(name = "description")
+    val type: String, // CAR, BIKE, TRACTOR
+    val year: Int,
+    val iconId: Int,
+    val metadata: Map<String, String>
 )
