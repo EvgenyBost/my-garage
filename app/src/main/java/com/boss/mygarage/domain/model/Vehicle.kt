@@ -1,13 +1,21 @@
 package com.boss.mygarage.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class VehicleType {CAR, BIKE, TRACTOR, BICYCLE}
+
+@Serializable
+data class VehicleMetric(
+    val name: String = "",
+    val value: String = "",
+    val showOnMain: Boolean = false,
+)
 
 data class Vehicle(
     val id: Long,
     val name: String,
     val description: String?,
     val type: VehicleType,
-    val year: Int,
-    val iconId: Int,
-    val mainMetrics: Map<String, String> // Ex: "Mileage" -> "12000"
+    val metadata: List<VehicleMetric>,
 )

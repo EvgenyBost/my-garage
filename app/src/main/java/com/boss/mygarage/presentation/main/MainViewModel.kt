@@ -29,9 +29,9 @@ class MainViewModel(
             initialValue = emptyList()
         )
 
-    fun onEditClick(vehicle: Vehicle) {
-        // Show details screen
-    }
+//    fun onEditClick(vehicleId: Long) {
+//        // Show details screen
+//    }
 
     fun onVehicleClick(vehicle: Vehicle) {
         // Show details screen

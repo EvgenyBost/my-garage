@@ -23,7 +23,7 @@ class VehicleRepositoryImpl(
     }
 
     override suspend fun saveVehicle(vehicle: Vehicle) {
-        vehicleDao.insertVehicle(vehicle.toEntity())
+        vehicleDao.upsertVehicle(vehicle.toEntity())
     }
 
     override suspend fun deleteVehicle(vehicle: Vehicle) {

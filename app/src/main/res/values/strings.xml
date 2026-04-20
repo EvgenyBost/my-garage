@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">My Garage</string>
+
+    //Main Screen
+    <string name="main_screen_title">Мой гараж</string>
+    <string name="add_vehicle_content_description">Добавить транспорт</string>
+    <string name="edit_vehicle_content_description">Изменить</string>
+    <string name="vehicle_year">Год: %1$d</string>
+
+    //Add Vehicle Screen
+    <string name="add_vehicle_title">Добавить транспорт</string>
+    <string name="edit_vehicle_title">Редактирование</string>
+    <string name="field_name">Название</string>
+    <string name="field_year">Год выпуска</string>
+    <string name="field_type">Тип транспорта</string>
+    <string name="additional_params">Дополнительные параметры</string>
+    <string name="param_name">Имя параметра</string>
+    <string name="param_value">Значение</string>
+    <string name="show_on_main">На главный экран</string>
+    <string name="add_param_button">Добавить параметр</string>
+    <string name="cancel_button_description">Отмена</string>
+
 </resources>

@@ -9,7 +9,7 @@ import com.boss.mygarage.data.local.dao.VehicleDao
 import com.boss.mygarage.data.local.entities.NoteEntity
 import com.boss.mygarage.data.local.entities.VehicleEntity
 
-@Database(entities = [VehicleEntity::class, NoteEntity::class], version = 1, exportSchema = false)
+@Database(entities = [VehicleEntity::class, NoteEntity::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun vehicleDao(): VehicleDao
@@ -19,18 +19,46 @@ abstract class AppDatabase : RoomDatabase() {
 class DatabaseCallback : RoomDatabase.Callback() {
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
-        // Тестовые данные (в формате JSON для метаданных)
+        insertTestData(db)
+    }
+
+    override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
+        super.onDestructiveMigration(db)
+    }
+
+    //TODO: Delete in production!
+    override fun onOpen(db: SupportSQLiteDatabase) {
+        super.onOpen(db)
+        db.query("SELECT count(*) FROM vehicles").use { cursor ->
+            if (cursor.moveToFirst() && cursor.getInt(0) == 0) {
+                insertTestData(db)
+            }
+        }
+    }
+
+    private fun insertTestData(db: SupportSQLiteDatabase) {
         db.execSQL("""
-            INSERT INTO vehicles (name, type, year, iconId, metadata) 
-            VALUES ('Lada Vesta', 'CAR', 2021, 1, '{"Пробег":"45000 км", "Двигатель":"1.6"}')
+            INSERT INTO vehicles (name, type, metadata)
+            VALUES ('Lada Vesta', 'CAR',
+            '[{"name":"Пробег","value":"45000 км","showOnMain":true}, {"name":"Двигатель","value":"1.6","showOnMain":false}]')
         """)
         db.execSQL("""
-            INSERT INTO vehicles (name, type, year, iconId, metadata) 
-            VALUES ('Yamaha R6', 'BIKE', 2019, 2, '{"Пробег":"12000 км", "Цепь":"Обслужена"}')
+            INSERT INTO vehicles (name, type, metadata)
+            VALUES ('Lada Iskra', 'CAR', '[{"name":"Пробег","value":"45000 км","showOnMain":true}]')
         """)
         db.execSQL("""
-            INSERT INTO vehicles (name, type, year, iconId, metadata) 
-            VALUES ('Мотоблок Нева', 'TRACTOR', 2023, 3, '{"Моточасы":"12 ч", "Фрезы":"Установлены"}')
+            INSERT INTO vehicles (name, type, metadata)
+            VALUES ('TLC Prado', 'CAR', '[{"name":"Пробег","value":"45000 км","showOnMain":true}]')
+        """)
+        db.execSQL("""
+            INSERT INTO vehicles (name, type, metadata)
+            VALUES ('Yamaha R6', 'BIKE',
+            '[{"name":"Пробег","value":"12000 км","showOnMain":true}, {"name":"Цепь","value":"Обслужена","showOnMain":true}]')
+        """)
+        db.execSQL("""
+            INSERT INTO vehicles (name, type, metadata)
+            VALUES ('Мотоблок Нева', 'TRACTOR',
+            '[{"name":"Моточасы","value":"12 ч","showOnMain":true}]')
         """)
     }
 }
