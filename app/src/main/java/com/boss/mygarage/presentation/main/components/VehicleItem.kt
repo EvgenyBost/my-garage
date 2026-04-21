@@ -13,11 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Agriculture
-import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.PedalBike
-import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -33,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.boss.mygarage.R
 import com.boss.mygarage.domain.model.Vehicle
-import com.boss.mygarage.domain.model.VehicleType
+import com.boss.mygarage.presentation.common.mappers.toIcon
 
 @Composable
 fun VehicleItem(
@@ -63,7 +59,7 @@ fun VehicleItem(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = getIconForType(vehicle.type),
+                    imageVector = vehicle.type.toIcon(),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -104,12 +100,4 @@ fun VehicleItem(
             }
         }
     }
-}
-
-@Composable
-fun getIconForType(type: VehicleType) = when (type) {
-    VehicleType.CAR -> Icons.Default.DirectionsCar
-    VehicleType.BIKE -> Icons.Default.TwoWheeler
-    VehicleType.TRACTOR -> Icons.Default.Agriculture
-    VehicleType.BICYCLE -> Icons.Default.PedalBike
 }

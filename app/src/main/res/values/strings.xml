@@ -25,4 +25,10 @@
     <string name="button_no_title">Нет</string>>
 
 
+    //Transport types
+    <string name="type_car">Легковой автомобиль</string>
+    <string name="type_bike">Мотоцикл</string>
+    <string name="type_tractor">Трактор</string>
+    <string name="type_bicycle">Велосипед</string>
+
 </resources>

@@ -20,7 +20,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,12 +35,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boss.mygarage.R
+import com.boss.mygarage.domain.model.VehicleType
+import com.boss.mygarage.presentation.common.mappers.toDisplayName
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,14 +68,18 @@ fun EditVehicleScreen(
         AlertDialog(
             onDismissRequest = { viewModel.dismissConfirmationDialog() },
             title = { Text(stringResource(R.string.cancel_changes_alert_title)) },
-            text = { Text( stringResource(R.string.cancel_changes_alert_details)) },
+            text = { Text(stringResource(R.string.cancel_changes_alert_details)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.dismissConfirmationDialog(onCancel)
                 }) { Text(stringResource(R.string.button_yes_title)) }
             },
             dismissButton = {
-                TextButton(onClick = { viewModel.dismissConfirmationDialog() }) { Text(stringResource(R.string.button_no_title)) }
+                TextButton(onClick = { viewModel.dismissConfirmationDialog() }) {
+                    Text(
+                        stringResource(R.string.button_no_title)
+                    )
+                }
             }
         )
     }
@@ -91,7 +104,10 @@ fun EditVehicleScreen(
                             contentDescription = stringResource(R.string.cancel_button_description)
                         )
                     }
-                    IconButton(onClick = { viewModel.saveVehicle(onSuccess = onSave) }, enabled = uiState.hasChanges) {
+                    IconButton(
+                        onClick = { viewModel.saveVehicle(onSuccess = onSave) },
+                        enabled = uiState.hasChanges
+                    ) {
                         Icon(Icons.Default.Check, contentDescription = null)
                     }
                 }
@@ -116,14 +132,44 @@ fun EditVehicleScreen(
             }
 
             item {
-                // TODO: ADD Exposed Dropdown Menu to choose (VehicleType), add Description
-//                OutlinedTextField(
-//                    value = uiState.year,
-//                    onValueChange = { viewModel.onYearChange(it) },
-//                    label = { Text(stringResource(R.string.field_year)) },
-//                    modifier = Modifier.fillMaxWidth(),
-//                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-//                )
+                var expanded by remember { mutableStateOf(false) }
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                        onExpandedChange = { expanded = !expanded },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = uiState.type.toDisplayName(),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.field_type)) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        modifier = Modifier
+                            .menuAnchor(
+                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                enabled = true
+                            )
+                            .fillMaxWidth()
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        VehicleType.entries.forEach { type ->
+                            DropdownMenuItem(
+                                text = { Text(text = type.toDisplayName()) },
+                                onClick = {
+                                    viewModel.onTypeChange(type)
+                                    expanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                            )
+                        }
+                    }
+                }
             }
 
             item {

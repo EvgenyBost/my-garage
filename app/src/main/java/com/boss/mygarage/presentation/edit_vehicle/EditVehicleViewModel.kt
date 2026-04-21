@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.boss.mygarage.domain.model.Vehicle
 import com.boss.mygarage.domain.model.VehicleMetric
+import com.boss.mygarage.domain.model.VehicleType
 import com.boss.mygarage.domain.usecase.vehicle.GetVehicleByIdUseCase
 import com.boss.mygarage.domain.usecase.vehicle.SaveVehicleUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,6 +59,11 @@ class EditVehicleViewModel(
         markHasChanges()
     }
 
+    fun onTypeChange(newType: VehicleType) {
+        _uiState.update { it.copy(type = newType) }
+        markHasChanges()
+    }
+
     // Add new empty parameters string
     fun addCustomParam() {
         _uiState.update { it.copy(customParams = it.customParams + CustomParamState()) }
@@ -91,7 +97,7 @@ class EditVehicleViewModel(
     fun saveVehicle(onSuccess: () -> Unit) {
         val state = _uiState.value
 
-        if(!state.hasChanges){
+        if (!state.hasChanges) {
             onSuccess()
             return
         }
