@@ -1,5 +1,6 @@
 package com.boss.mygarage.presentation.edit_vehicle
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -47,6 +49,28 @@ fun EditVehicleScreen(
     // Get state from ViewModel (Need to create special fields in VM)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    // Intercept "Back" button click
+    BackHandler(enabled = uiState.hasChanges) {
+        viewModel.onCancelClick(onCancel)
+    }
+
+    // Cancel changes confirmation dialog
+    if (uiState.showConfirmationDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissConfirmationDialog() },
+            title = { Text(stringResource(R.string.cancel_changes_alert_title)) },
+            text = { Text( stringResource(R.string.cancel_changes_alert_details)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.dismissConfirmationDialog(onCancel)
+                }) { Text(stringResource(R.string.button_yes_title)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissConfirmationDialog() }) { Text(stringResource(R.string.button_no_title)) }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -59,19 +83,15 @@ fun EditVehicleScreen(
                         }
                     )
                 },
-//                navigationIcon = {
-//                    IconButton(onClick = onCancel) {
-//                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel_button_description))
-//                    }
-//                },
+
                 actions = {
-                    IconButton(onClick = onCancel) {
+                    IconButton(onClick = { viewModel.onCancelClick(onCancel) }) {
                         Icon(
                             Icons.Default.Close,
                             contentDescription = stringResource(R.string.cancel_button_description)
                         )
                     }
-                    IconButton(onClick = { viewModel.saveVehicle(onSuccess = onSave) }) {
+                    IconButton(onClick = { viewModel.saveVehicle(onSuccess = onSave) }, enabled = uiState.hasChanges) {
                         Icon(Icons.Default.Check, contentDescription = null)
                     }
                 }

@@ -37,7 +37,8 @@ class EditVehicleViewModel(
                                     value = it.value,
                                     showOnMain = it.showOnMain
                                 )
-                            }
+                            },
+                            hasChanges = false
                         )
                     }
                 }
@@ -45,25 +46,37 @@ class EditVehicleViewModel(
         }
     }
 
+    //Need to call this method if any data has changed
+    private fun markHasChanges() {
+        if (!_uiState.value.hasChanges) {
+            _uiState.update { it.copy(hasChanges = true) }
+        }
+    }
+
     fun onNameChange(newName: String) {
         _uiState.update { it.copy(name = newName) }
+        markHasChanges()
     }
 
     // Add new empty parameters string
     fun addCustomParam() {
         _uiState.update { it.copy(customParams = it.customParams + CustomParamState()) }
+        markHasChanges()
     }
 
     fun onParamNameChange(id: Long, newName: String) {
         updateParam(id) { it.copy(name = newName) }
+        markHasChanges()
     }
 
     fun onParamValueChange(id: Long, newValue: String) {
         updateParam(id) { it.copy(value = newValue) }
+        markHasChanges()
     }
 
     fun onParamShowChange(id: Long, show: Boolean) {
         updateParam(id) { it.copy(showOnMain = show) }
+        markHasChanges()
     }
 
     private fun updateParam(id: Long, transform: (CustomParamState) -> CustomParamState) {
@@ -72,10 +85,18 @@ class EditVehicleViewModel(
                 if (it.id == id) transform(it) else it
             })
         }
+        markHasChanges()
     }
 
     fun saveVehicle(onSuccess: () -> Unit) {
         val state = _uiState.value
+
+        if(!state.hasChanges){
+            onSuccess()
+            return
+        }
+
+        //TODO: show alert dialog if name is blanc
 
         val vehicleToSave = Vehicle(
             id = vehicleId ?: 0L, // 0 to create, specify to update
@@ -97,5 +118,18 @@ class EditVehicleViewModel(
             saveVehicleUseCase(vehicleToSave)
             onSuccess()
         }
+    }
+
+    fun onCancelClick(onNavigateBack: () -> Unit) {
+        if (_uiState.value.hasChanges) {
+            _uiState.update { it.copy(showConfirmationDialog = true) }
+        } else {
+            onNavigateBack()
+        }
+    }
+
+    fun dismissConfirmationDialog(action: (() -> Unit)? = null) {
+        _uiState.update { it.copy(showConfirmationDialog = false) }
+        action?.invoke()
     }
 }

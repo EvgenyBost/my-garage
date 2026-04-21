@@ -7,7 +7,7 @@
     <string name="edit_vehicle_content_description">Изменить</string>
     <string name="vehicle_year">Год: %1$d</string>
 
-    //Add Vehicle Screen
+    //Edit Vehicle Screen
     <string name="add_vehicle_title">Добавить транспорт</string>
     <string name="edit_vehicle_title">Редактирование</string>
     <string name="field_name">Название</string>
@@ -19,5 +19,10 @@
     <string name="show_on_main">На главный экран</string>
     <string name="add_param_button">Добавить параметр</string>
     <string name="cancel_button_description">Отмена</string>
+    <string name="cancel_changes_alert_title">Отменить изменения?</string>>
+    <string name="cancel_changes_alert_details">Все несохраненные данные будут потеряны.</string>>
+    <string name="button_yes_title">Да</string>>
+    <string name="button_no_title">Нет</string>>
+
 
 </resources>

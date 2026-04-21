@@ -8,12 +8,14 @@ data class EditVehicleUiState(
     val name: String = "",
     val type: VehicleType = VehicleType.CAR,
     val description: String = "",
-    val customParams: List<CustomParamState> = emptyList()
+    val customParams: List<CustomParamState> = emptyList(),
+    val showConfirmationDialog: Boolean = false,
+    val hasChanges: Boolean = false,
 )
 
 data class CustomParamState(
     val id: Long = Random.nextLong(), // Unique ID for key in LazyColumn
     val name: String = "",
     val value: String = "",
-    val showOnMain: Boolean = false
+    val showOnMain: Boolean = false,
 )
