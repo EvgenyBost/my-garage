@@ -48,10 +48,16 @@
     <string name="type_other">Другое</string>
 
     //Standart Vehicle Metric types
+    <string name="metric_type_year">Год выпуска</string>
     <string name="metric_type_mileage">Пробег</string>
     <string name="metric_type_color">Цвет</string>
     <string name="metric_type_license_plate">Гос. номер</string>
     <string name="metric_type_vin">VIN</string>
     <string name="metric_type_custom">Пользовательский параметр</string>
+
+    //MetricValidationError descriptions
+    <string name="metric_validation_error_empty_name">Введите имя</string>
+    <string name="metric_validation_error_empty_value">Введите значение</string>
+    <string name="metric_validation_error_invalid_format">Неверный формат</string>
 
 </resources>

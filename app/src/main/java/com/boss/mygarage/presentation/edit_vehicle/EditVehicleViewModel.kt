@@ -2,11 +2,14 @@ package com.boss.mygarage.presentation.edit_vehicle
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.boss.mygarage.domain.model.StandardVehicleMetricType
 import com.boss.mygarage.domain.model.Vehicle
-import com.boss.mygarage.domain.model.VehicleMetric
 import com.boss.mygarage.domain.model.VehicleType
+import com.boss.mygarage.domain.model.validate
 import com.boss.mygarage.domain.usecase.vehicle.GetVehicleByIdUseCase
 import com.boss.mygarage.domain.usecase.vehicle.SaveVehicleUseCase
+import com.boss.mygarage.presentation.common.utils.toCustomParamState
+import com.boss.mygarage.presentation.common.utils.toVehicleMetric
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -32,12 +35,8 @@ class EditVehicleViewModel(
                             name = vehicle.name,
                             type = vehicle.type,
                             description = vehicle.description ?: "",
-                            customParams = vehicle.metadata.map {
-                                CustomParamState(
-                                    name = it.name,
-                                    value = it.value,
-                                    showOnMain = it.showOnMain
-                                )
+                            customParams = vehicle.metadata.map { vehicleMetric ->
+                                vehicleMetric.toCustomParamState()
                             },
                             hasChanges = false
                         )
@@ -70,13 +69,19 @@ class EditVehicleViewModel(
         markHasChanges()
     }
 
-    fun onParamNameChange(id: Long, newName: String) {
-        updateParam(id) { it.copy(name = newName) }
+    fun onParamNameChange(id: Long, newName: String, newType: StandardVehicleMetricType) {
+        updateParam(id) { currentParam ->
+            currentParam.copy(
+                name = newName,
+                type = newType,
+                error = null
+            )
+        }
         markHasChanges()
     }
 
     fun onParamValueChange(id: Long, newValue: String) {
-        updateParam(id) { it.copy(value = newValue) }
+        updateParam(id) { it.copy(value = newValue, error = null) }
         markHasChanges()
     }
 
@@ -103,7 +108,7 @@ class EditVehicleViewModel(
         markHasChanges()
     }
 
-    fun saveVehicle(onSuccess: () -> Unit) {
+    private fun saveVehicle(onSuccess: () -> Unit) {
         val state = _uiState.value
 
         if (!state.hasChanges) {
@@ -111,21 +116,15 @@ class EditVehicleViewModel(
             return
         }
 
-        //TODO: show alert dialog if name is blanc
-
         val vehicleToSave = Vehicle(
             id = vehicleId ?: 0L, // 0 to create, specify to update
             name = state.name,
             type = state.type,
             description = state.description,
             metadata = state.customParams
-                .filter { it.name.isNotBlank() }
+                .filter { it.name.isNotBlank() || it.type != StandardVehicleMetricType.CUSTOM }
                 .map { param ->
-                    VehicleMetric(
-                        name = param.name,
-                        value = param.value,
-                        showOnMain = param.showOnMain
-                    )
+                    param.toVehicleMetric()
                 }
         )
 
@@ -133,6 +132,27 @@ class EditVehicleViewModel(
             saveVehicleUseCase(vehicleToSave)
             onSuccess()
         }
+    }
+
+    fun validateAndSave(onSuccess: () -> Unit): Int? {
+        val params = _uiState.value.customParams
+        var firstErrorIndex: Int? = null
+
+        val validatedParams = params.mapIndexed { index, param ->
+            val errorType = param.toVehicleMetric().validate()
+
+            if (errorType != null && firstErrorIndex == null) {
+                firstErrorIndex = index
+            }
+            param.copy(error = errorType)
+        }
+
+        _uiState.update { it.copy(customParams = validatedParams) }
+
+        if (firstErrorIndex == null) {
+            saveVehicle(onSuccess)
+        }
+        return firstErrorIndex
     }
 
     fun onCancelClick(onNavigateBack: () -> Unit) {

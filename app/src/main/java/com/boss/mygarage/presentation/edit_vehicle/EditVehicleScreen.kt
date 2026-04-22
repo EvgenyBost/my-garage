@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -41,13 +42,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boss.mygarage.R
+import com.boss.mygarage.domain.model.MetricValidationError
 import com.boss.mygarage.domain.model.StandardVehicleMetricType
+import com.boss.mygarage.domain.model.StandardVehicleMetricType.*
 import com.boss.mygarage.domain.model.VehicleType
+import com.boss.mygarage.presentation.common.mappers.toDisplayMessage
 import com.boss.mygarage.presentation.common.mappers.toDisplayName
+import com.boss.mygarage.presentation.common.utils.getKeyboardTypeForMetric
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,7 +114,7 @@ fun EditVehicleScreen(
                         )
                     }
                     IconButton(
-                        onClick = { viewModel.saveVehicle(onSuccess = onSave) },
+                        onClick = { viewModel.validateAndSave (onSuccess = onSave) },
                         enabled = uiState.hasChanges
                     ) {
                         Icon(Icons.Default.Check, contentDescription = null)
@@ -116,6 +123,22 @@ fun EditVehicleScreen(
             )
         }
     ) { innerPadding ->
+
+        val context = LocalContext.current
+
+        val paramNameToTypeMap = remember(context) {
+            StandardVehicleMetricType.entries.associateBy { type ->
+                context.getString(when(type) {
+                    YEAR -> R.string.metric_type_year
+                    MILEAGE -> R.string.metric_type_mileage
+                    COLOR -> R.string.metric_type_color
+                    LICENSE_PLATE -> R.string.metric_type_license_plate
+                    VIN -> R.string.metric_type_vin
+                    CUSTOM -> R.string.metric_type_custom
+                })
+            }
+        }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -188,7 +211,10 @@ fun EditVehicleScreen(
                 CustomParamCell(
                     modifier = Modifier.animateItem(),
                     param = param,
-                    onNameChange = { newName -> viewModel.onParamNameChange(param.id, newName) },
+                    onNameChange = { newName ->
+                        val newType = paramNameToTypeMap[newName.trim()] ?: CUSTOM
+                        viewModel.onParamNameChange(param.id, newName, newType)
+                    },
                     onValueChange = { newVal -> viewModel.onParamValueChange(param.id, newVal) },
                     onShowOnMainChange = { show -> viewModel.onParamShowChange(param.id, show) },
                     onDeleteConfirm = { viewModel.onParamDelete(param.id) },
@@ -220,28 +246,32 @@ fun CustomParamCell(
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    var expanded by remember { mutableStateOf(false) }
-
-    // Get standard param names
-    val standardNames = StandardVehicleMetricType.entries
-        .filter { it != StandardVehicleMetricType.CUSTOM }
-        .map { it.toDisplayName() }
+    val isError = param.error != null
 
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                alpha = 0.5f
-            )
+            containerColor = if (isError)
+                MaterialTheme.colorScheme.errorContainer
+            else
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val paramName = if(param.type == CUSTOM) param.name else param.type.toDisplayName()
+
                 MetricNameInputField(
-                    value = param.name,
+                    value = paramName,
                     onValueChange = onNameChange,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    error = param.error
                 )
+
+                val isParamValueError = (isError && (
+                        param.error == MetricValidationError.INVALID_FORMAT
+                        || param.error == MetricValidationError.EMPTY_VALUE))
+
                 OutlinedTextField(
                     value = param.value,
                     onValueChange = onValueChange,
@@ -249,6 +279,16 @@ fun CustomParamCell(
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     maxLines = 1,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = param.getKeyboardTypeForMetric(),
+                        imeAction = ImeAction.Done
+                    ),
+                    isError = isParamValueError,
+                    supportingText = {
+                        if (isParamValueError) {
+                            Text(text = param.error.toDisplayMessage())
+                        }
+                    }
                 )
             }
             Row(
@@ -300,16 +340,20 @@ fun CustomParamCell(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MetricNameInputField(
+    modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    error: MetricValidationError?
+
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    // Получаем список всех стандартных имен (кроме CUSTOM)
+    // Get all standard param names (except CUSTOM)
     val standardNames = StandardVehicleMetricType.entries
         .filter { it != StandardVehicleMetricType.CUSTOM }
         .map { it.toDisplayName() }
+
+    val isParamNameError = error == MetricValidationError.EMPTY_NAME
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -330,9 +374,17 @@ fun MetricNameInputField(
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
             singleLine = true,
             maxLines = 1,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            ),
+            isError = isParamNameError,
+            supportingText = {
+                if (isParamNameError) {
+                    Text(text = error.toDisplayMessage())
+                }
+            },
         )
 
-        // Фильтруем подсказки по вводу
         val filteredOptions = standardNames.filter {
             it.contains(value, ignoreCase = true)
         }

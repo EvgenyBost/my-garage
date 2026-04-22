@@ -28,7 +28,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.boss.mygarage.R
+import com.boss.mygarage.domain.model.StandardVehicleMetricType
 import com.boss.mygarage.domain.model.Vehicle
+import com.boss.mygarage.presentation.common.mappers.toDisplayName
 import com.boss.mygarage.presentation.common.mappers.toIcon
 
 @Composable
@@ -82,8 +84,9 @@ fun VehicleItem(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 vehicle.metadata.filter { it.showOnMain }.forEach { metric ->
+                    val metricName = if( metric.type == StandardVehicleMetricType.CUSTOM) metric.customName?:"" else metric.type.toDisplayName()
                     Text(
-                        text = "${metric.name}: ${metric.value}",
+                        text = "${metricName}: ${metric.value}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                     )

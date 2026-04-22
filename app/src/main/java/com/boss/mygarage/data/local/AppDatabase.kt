@@ -9,7 +9,7 @@ import com.boss.mygarage.data.local.dao.VehicleDao
 import com.boss.mygarage.data.local.entities.NoteEntity
 import com.boss.mygarage.data.local.entities.VehicleEntity
 
-@Database(entities = [VehicleEntity::class, NoteEntity::class], version = 3, exportSchema = false)
+@Database(entities = [VehicleEntity::class, NoteEntity::class], version = 4, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun vehicleDao(): VehicleDao
@@ -40,25 +40,25 @@ class DatabaseCallback : RoomDatabase.Callback() {
         db.execSQL("""
             INSERT INTO vehicles (name, type, metadata)
             VALUES ('Lada Vesta', 'CAR',
-            '[{"name":"Пробег","value":"45000 км","showOnMain":true}, {"name":"Двигатель","value":"1.6","showOnMain":false}]')
+            '[{"type": "MILEAGE","customName": null,"value":"45000 км","showOnMain":true}, {"type": "CUSTOM","customName": "Двигатель","value":"1.6","showOnMain":false}]')
         """)
         db.execSQL("""
             INSERT INTO vehicles (name, type, metadata)
-            VALUES ('Lada Iskra', 'CAR', '[{"name":"Пробег","value":"45000 км","showOnMain":true}]')
+            VALUES ('Lada Iskra', 'CAR', '[{"type": "MILEAGE","customName": null,"value":"45000 км","showOnMain":true}]')
         """)
         db.execSQL("""
             INSERT INTO vehicles (name, type, metadata)
-            VALUES ('TLC Prado', 'CAR', '[{"name":"Пробег","value":"45000 км","showOnMain":true}]')
+            VALUES ('TLC Prado', 'CAR', '[{"type": "MILEAGE","customName": null,"value":"45000 км","showOnMain":true}]')
         """)
         db.execSQL("""
             INSERT INTO vehicles (name, type, metadata)
             VALUES ('Yamaha R6', 'BIKE',
-            '[{"name":"Пробег","value":"12000 км","showOnMain":true}, {"name":"Цепь","value":"Обслужена","showOnMain":true}]')
+            '[{"type": "MILEAGE","customName": null,"value":"12000 км","showOnMain":true}, {"type": "CUSTOM","customName": "Цепь","value":"Обслужена","showOnMain":true}]')
         """)
         db.execSQL("""
             INSERT INTO vehicles (name, type, metadata)
             VALUES ('Мотоблок Нева', 'TRACTOR',
-            '[{"name":"Моточасы","value":"12 ч","showOnMain":true}]')
+            '[{"type": "CUSTOM","customName": "Моточасы","value":"12 ч","showOnMain":true}]')
         """)
     }
 }
