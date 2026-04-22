@@ -85,6 +85,15 @@ class EditVehicleViewModel(
         markHasChanges()
     }
 
+    fun onParamDelete(id: Long) {
+        _uiState.update { state ->
+            state.copy(
+                customParams = state.customParams.filter { it.id != id }
+            )
+        }
+        markHasChanges()
+    }
+
     private fun updateParam(id: Long, transform: (CustomParamState) -> CustomParamState) {
         _uiState.update { state ->
             state.copy(customParams = state.customParams.map {

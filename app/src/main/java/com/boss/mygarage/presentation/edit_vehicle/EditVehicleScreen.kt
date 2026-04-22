@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boss.mygarage.R
+import com.boss.mygarage.domain.model.StandardVehicleMetricType
 import com.boss.mygarage.domain.model.VehicleType
 import com.boss.mygarage.presentation.common.mappers.toDisplayName
 import org.koin.androidx.compose.koinViewModel
@@ -136,7 +138,7 @@ fun EditVehicleScreen(
 
                 ExposedDropdownMenuBox(
                     expanded = expanded,
-                        onExpandedChange = { expanded = !expanded },
+                    onExpandedChange = { expanded = !expanded },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     OutlinedTextField(
@@ -184,10 +186,12 @@ fun EditVehicleScreen(
                 items = uiState.customParams,
                 key = { it.id }) { param ->
                 CustomParamCell(
+                    modifier = Modifier.animateItem(),
                     param = param,
                     onNameChange = { newName -> viewModel.onParamNameChange(param.id, newName) },
                     onValueChange = { newVal -> viewModel.onParamValueChange(param.id, newVal) },
-                    onShowOnMainChange = { show -> viewModel.onParamShowChange(param.id, show) }
+                    onShowOnMainChange = { show -> viewModel.onParamShowChange(param.id, show) },
+                    onDeleteConfirm = { viewModel.onParamDelete(param.id) },
                 )
             }
 
@@ -207,13 +211,24 @@ fun EditVehicleScreen(
 
 @Composable
 fun CustomParamCell(
+    modifier: Modifier = Modifier,
     param: CustomParamState, // Help data class for UI
     onNameChange: (String) -> Unit,
     onValueChange: (String) -> Unit,
-    onShowOnMainChange: (Boolean) -> Unit
+    onShowOnMainChange: (Boolean) -> Unit,
+    onDeleteConfirm: () -> Unit,
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    var expanded by remember { mutableStateOf(false) }
+
+    // Get standard param names
+    val standardNames = StandardVehicleMetricType.entries
+        .filter { it != StandardVehicleMetricType.CUSTOM }
+        .map { it.toDisplayName() }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
                 alpha = 0.5f
@@ -222,17 +237,18 @@ fun CustomParamCell(
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
+                MetricNameInputField(
                     value = param.name,
                     onValueChange = onNameChange,
-                    label = { Text(stringResource(R.string.param_name)) },
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
                     value = param.value,
                     onValueChange = onValueChange,
                     label = { Text(stringResource(R.string.param_value)) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    maxLines = 1,
                 )
             }
             Row(
@@ -242,8 +258,100 @@ fun CustomParamCell(
                 Checkbox(checked = param.showOnMain, onCheckedChange = onShowOnMainChange)
                 Text(
                     text = stringResource(R.string.show_on_main),
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.weight(1f)
                 )
+                IconButton(onClick = { showDeleteDialog = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.delete_button_description),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text(stringResource(R.string.delete_parameter_alert_title)) },
+                text = { Text(stringResource(R.string.delete_parameter_alert_details)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onDeleteConfirm()
+                        showDeleteDialog = false
+                    }) {
+                        Text(
+                            stringResource(R.string.delete_button_title),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteDialog = false }) {
+                        Text(stringResource(R.string.cancel_button_title))
+                    }
+                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MetricNameInputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    // Получаем список всех стандартных имен (кроме CUSTOM)
+    val standardNames = StandardVehicleMetricType.entries
+        .filter { it != StandardVehicleMetricType.CUSTOM }
+        .map { it.toDisplayName() }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = {
+                onValueChange(it)
+                expanded = true
+            },
+            label = { Text(stringResource(R.string.param_name)) },
+            modifier = Modifier
+                .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryEditable)
+                .fillMaxWidth(),
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            singleLine = true,
+            maxLines = 1,
+        )
+
+        // Фильтруем подсказки по вводу
+        val filteredOptions = standardNames.filter {
+            it.contains(value, ignoreCase = true)
+        }
+
+        if (filteredOptions.isNotEmpty()) {
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                filteredOptions.forEach { name ->
+                    DropdownMenuItem(
+                        text = { Text(name) },
+                        onClick = {
+                            onValueChange(name)
+                            expanded = false
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    )
+                }
             }
         }
     }
