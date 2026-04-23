@@ -46,10 +46,11 @@ enum class VehicleColor {
     CUSTOM_COLOR
 }
 
-enum class MetricValidationError {
-    EMPTY_NAME,
-    EMPTY_VALUE,
-    INVALID_FORMAT
+enum class VehicleValidationError {
+    EMPTY_VEHICLE_NAME,
+    EMPTY_PARAM_NAME,
+    EMPTY_PARAM_VALUE,
+    INVALID_PARAM_FORMAT
 }
 
 @Serializable

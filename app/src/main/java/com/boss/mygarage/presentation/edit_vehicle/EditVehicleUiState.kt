@@ -1,8 +1,8 @@
 package com.boss.mygarage.presentation.edit_vehicle
 
-import com.boss.mygarage.domain.model.MetricValidationError
 import com.boss.mygarage.domain.model.VehicleMetricType
 import com.boss.mygarage.domain.model.VehicleType
+import com.boss.mygarage.domain.model.VehicleValidationError
 import kotlin.random.Random
 
 data class EditVehicleUiState(
@@ -13,6 +13,7 @@ data class EditVehicleUiState(
     val customParams: List<CustomParamState> = emptyList(),
     val showConfirmationDialog: Boolean = false,
     val hasChanges: Boolean = false,
+    val error: VehicleValidationError? = null
 )
 
 data class CustomParamState(
@@ -21,5 +22,5 @@ data class CustomParamState(
     val value: String = "",
     val showOnMain: Boolean = false,
     val type: VehicleMetricType = VehicleMetricType.CUSTOM,
-    val error: MetricValidationError? = null
+    val error: VehicleValidationError? = null
 )

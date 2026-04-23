@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.boss.mygarage.domain.model.Vehicle
 import com.boss.mygarage.domain.model.VehicleMetricType
 import com.boss.mygarage.domain.model.VehicleType
+import com.boss.mygarage.domain.model.VehicleValidationError
 import com.boss.mygarage.domain.model.validate
 import com.boss.mygarage.domain.usecase.vehicle.GetVehicleByIdUseCase
 import com.boss.mygarage.domain.usecase.vehicle.SaveVehicleUseCase
@@ -38,7 +39,8 @@ class EditVehicleViewModel(
                             customParams = vehicle.metadata.map { vehicleMetric ->
                                 vehicleMetric.toCustomParamState()
                             },
-                            hasChanges = false
+                            hasChanges = false,
+                            error = null
                         )
                     }
                 }
@@ -54,7 +56,7 @@ class EditVehicleViewModel(
     }
 
     fun onNameChange(newName: String) {
-        _uiState.update { it.copy(name = newName) }
+        _uiState.update { it.copy(name = newName, error = null) }
         markHasChanges()
     }
 
@@ -135,6 +137,9 @@ class EditVehicleViewModel(
     }
 
     fun validateAndSave(onSuccess: () -> Unit): Int? {
+        if (_uiState.value.name.isBlank())
+            _uiState.update { it.copy(error = VehicleValidationError.EMPTY_VEHICLE_NAME) }
+
         val params = _uiState.value.customParams
         var firstErrorIndex: Int? = null
 
@@ -149,7 +154,7 @@ class EditVehicleViewModel(
 
         _uiState.update { it.copy(customParams = validatedParams) }
 
-        if (firstErrorIndex == null) {
+        if (firstErrorIndex == null && _uiState.value.error == null) {
             saveVehicle(onSuccess)
         }
         return firstErrorIndex

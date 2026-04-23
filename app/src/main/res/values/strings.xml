@@ -56,10 +56,11 @@
     <string name="metric_type_vin">VIN</string>
     <string name="metric_type_custom">Пользовательский параметр</string>
 
-    //MetricValidationError descriptions
-    <string name="metric_validation_error_empty_name">Введите имя</string>
-    <string name="metric_validation_error_empty_value">Введите значение</string>
-    <string name="metric_validation_error_invalid_format">Неверный формат</string>
+    //VehicleValidationError descriptions
+    <string name="vehicle_validation_error_empty_param_name">Введите имя</string>
+    <string name="vehicle_validation_error_empty_param_value">Введите значение</string>
+    <string name="vehicle_validation_error_invalid_param_format">Неверный формат</string>
+    <string name="vehicle_validation_error_empty_name">Введите имя</string>
 
     //VehicalColor
     <string name="color_black">Черный</string>

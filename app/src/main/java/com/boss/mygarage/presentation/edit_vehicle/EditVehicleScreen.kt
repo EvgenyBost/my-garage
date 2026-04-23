@@ -54,7 +54,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boss.mygarage.R
-import com.boss.mygarage.domain.model.MetricValidationError
+import com.boss.mygarage.domain.model.VehicleValidationError
 import com.boss.mygarage.domain.model.VehicleColor
 import com.boss.mygarage.domain.model.VehicleMetricType.COLOR
 import com.boss.mygarage.domain.model.VehicleMetricType.CUSTOM
@@ -163,11 +163,17 @@ fun EditVehicleScreen(
         ) {
             // Main field
             item {
+                val isParamNameError = (uiState.error != null && uiState.error == VehicleValidationError.EMPTY_VEHICLE_NAME)
+
                 OutlinedTextField(
                     value = uiState.name,
                     onValueChange = { viewModel.onNameChange(it) },
                     label = { Text(stringResource(R.string.field_name)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = isParamNameError,
+                    supportingText = {
+                        Text(text = uiState.error?.toDisplayMessage()?:"")
+                    }
                 )
             }
 
@@ -296,8 +302,8 @@ fun CustomParamCell(
                 )
 
                 val isParamValueError = (isError && (
-                        param.error == MetricValidationError.INVALID_FORMAT
-                                || param.error == MetricValidationError.EMPTY_VALUE))
+                        param.error == VehicleValidationError.INVALID_PARAM_FORMAT
+                                || param.error == VehicleValidationError.EMPTY_PARAM_VALUE))
 
                 if (param.type == COLOR) {
                     VehicleColorDropdownMenu(
@@ -379,7 +385,7 @@ fun MetricNameInputField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    error: MetricValidationError?
+    error: VehicleValidationError?
 
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -389,7 +395,7 @@ fun MetricNameInputField(
         .filter { it != CUSTOM }
         .map { it.toDisplayName() }
 
-    val isParamNameError = error == MetricValidationError.EMPTY_NAME
+    val isParamNameError = error == VehicleValidationError.EMPTY_PARAM_NAME
 
     ExposedDropdownMenuBox(
         expanded = expanded,
