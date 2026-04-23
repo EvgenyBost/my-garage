@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,10 +29,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.boss.mygarage.R
-import com.boss.mygarage.domain.model.StandardVehicleMetricType
 import com.boss.mygarage.domain.model.Vehicle
+import com.boss.mygarage.domain.model.VehicleColor
+import com.boss.mygarage.domain.model.VehicleMetricType
+import com.boss.mygarage.domain.model.getColorMetric
+import com.boss.mygarage.presentation.common.mappers.toColor
 import com.boss.mygarage.presentation.common.mappers.toDisplayName
 import com.boss.mygarage.presentation.common.mappers.toIcon
+import com.boss.mygarage.presentation.common.mappers.toVehicleColorOrNull
 
 @Composable
 fun VehicleItem(
@@ -60,10 +65,21 @@ fun VehicleItem(
                     .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
+                val selectedColor = vehicle.getColorMetric()?.value?.toVehicleColorOrNull()
+                    ?: VehicleColor.CUSTOM_COLOR
+
                 Icon(
                     imageVector = vehicle.type.toIcon(),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = Color.Black.copy(alpha = 0.3f),
+                    modifier = Modifier
+                        .offset(x = 1.5.dp, y = 1.5.dp)
+                )
+
+                Icon(
+                    imageVector = vehicle.type.toIcon(),
+                    contentDescription = null,
+                    tint = selectedColor.toColor(),
                 )
             }
 
@@ -84,9 +100,15 @@ fun VehicleItem(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 vehicle.metadata.filter { it.showOnMain }.forEach { metric ->
-                    val metricName = if( metric.type == StandardVehicleMetricType.CUSTOM) metric.customName?:"" else metric.type.toDisplayName()
+                    val metricName = if (metric.type == VehicleMetricType.CUSTOM) metric.customName
+                        ?: "" else metric.type.toDisplayName()
+                    val metricValue = if (metric.type == VehicleMetricType.COLOR) {
+                        metric.value.toVehicleColorOrNull()?.toDisplayName()
+                            ?: VehicleColor.CUSTOM_COLOR.toDisplayName()
+                    } else metric.value
+
                     Text(
-                        text = "${metricName}: ${metric.value}",
+                        text = "${metricName}: $metricValue",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                     )

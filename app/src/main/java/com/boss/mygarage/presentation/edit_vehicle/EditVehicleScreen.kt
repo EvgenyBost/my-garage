@@ -1,7 +1,10 @@
 package com.boss.mygarage.presentation.edit_vehicle
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -9,9 +12,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -42,6 +47,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -49,11 +56,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boss.mygarage.R
 import com.boss.mygarage.domain.model.MetricValidationError
-import com.boss.mygarage.domain.model.StandardVehicleMetricType
-import com.boss.mygarage.domain.model.StandardVehicleMetricType.*
+import com.boss.mygarage.domain.model.VehicleColor
+import com.boss.mygarage.domain.model.VehicleMetricType
+import com.boss.mygarage.domain.model.VehicleMetricType.COLOR
+import com.boss.mygarage.domain.model.VehicleMetricType.CUSTOM
+import com.boss.mygarage.domain.model.VehicleMetricType.LICENSE_PLATE
+import com.boss.mygarage.domain.model.VehicleMetricType.MILEAGE
+import com.boss.mygarage.domain.model.VehicleMetricType.VIN
+import com.boss.mygarage.domain.model.VehicleMetricType.YEAR
+import com.boss.mygarage.domain.model.VehicleMetricType.entries
 import com.boss.mygarage.domain.model.VehicleType
+import com.boss.mygarage.presentation.common.mappers.toColor
 import com.boss.mygarage.presentation.common.mappers.toDisplayMessage
 import com.boss.mygarage.presentation.common.mappers.toDisplayName
+import com.boss.mygarage.presentation.common.mappers.toVehicleColorOrNull
 import com.boss.mygarage.presentation.common.utils.getKeyboardTypeForMetric
 import org.koin.androidx.compose.koinViewModel
 
@@ -114,7 +130,7 @@ fun EditVehicleScreen(
                         )
                     }
                     IconButton(
-                        onClick = { viewModel.validateAndSave (onSuccess = onSave) },
+                        onClick = { viewModel.validateAndSave(onSuccess = onSave) },
                         enabled = uiState.hasChanges
                     ) {
                         Icon(Icons.Default.Check, contentDescription = null)
@@ -127,15 +143,17 @@ fun EditVehicleScreen(
         val context = LocalContext.current
 
         val paramNameToTypeMap = remember(context) {
-            StandardVehicleMetricType.entries.associateBy { type ->
-                context.getString(when(type) {
-                    YEAR -> R.string.metric_type_year
-                    MILEAGE -> R.string.metric_type_mileage
-                    COLOR -> R.string.metric_type_color
-                    LICENSE_PLATE -> R.string.metric_type_license_plate
-                    VIN -> R.string.metric_type_vin
-                    CUSTOM -> R.string.metric_type_custom
-                })
+            entries.associateBy { type ->
+                context.getString(
+                    when (type) {
+                        YEAR -> R.string.metric_type_year
+                        MILEAGE -> R.string.metric_type_mileage
+                        COLOR -> R.string.metric_type_color
+                        LICENSE_PLATE -> R.string.metric_type_license_plate
+                        VIN -> R.string.metric_type_vin
+                        CUSTOM -> R.string.metric_type_custom
+                    }
+                )
             }
         }
 
@@ -259,7 +277,7 @@ fun CustomParamCell(
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val paramName = if(param.type == CUSTOM) param.name else param.type.toDisplayName()
+                val paramName = if (param.type == CUSTOM) param.name else param.type.toDisplayName()
 
                 MetricNameInputField(
                     value = paramName,
@@ -270,26 +288,35 @@ fun CustomParamCell(
 
                 val isParamValueError = (isError && (
                         param.error == MetricValidationError.INVALID_FORMAT
-                        || param.error == MetricValidationError.EMPTY_VALUE))
+                                || param.error == MetricValidationError.EMPTY_VALUE))
 
-                OutlinedTextField(
-                    value = param.value,
-                    onValueChange = onValueChange,
-                    label = { Text(stringResource(R.string.param_value)) },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    maxLines = 1,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = param.getKeyboardTypeForMetric(),
-                        imeAction = ImeAction.Done
-                    ),
-                    isError = isParamValueError,
-                    supportingText = {
-                        if (isParamValueError) {
-                            Text(text = param.error.toDisplayMessage())
+                if (param.type == COLOR) {
+                    VehicleColorDropdownMenu(
+                        param = param,
+                        onValueChange = onValueChange,
+                        modifier = Modifier.weight(1f),
+                    )
+                } else {
+                    OutlinedTextField(
+                        value = param.value,
+                        onValueChange = onValueChange,
+                        label = { Text(stringResource(R.string.param_value)) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        maxLines = 1,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = param.getKeyboardTypeForMetric(),
+                            imeAction = ImeAction.Done
+                        ),
+                        isError = isParamValueError,
+                        supportingText = {
+                            if (isParamValueError) {
+                                Text(text = param.error.toDisplayMessage())
+                            }
                         }
-                    }
-                )
+                    )
+                }
+
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -349,8 +376,8 @@ fun MetricNameInputField(
     var expanded by remember { mutableStateOf(false) }
 
     // Get all standard param names (except CUSTOM)
-    val standardNames = StandardVehicleMetricType.entries
-        .filter { it != StandardVehicleMetricType.CUSTOM }
+    val standardNames = entries
+        .filter { it != VehicleMetricType.CUSTOM }
         .map { it.toDisplayName() }
 
     val isParamNameError = error == MetricValidationError.EMPTY_NAME
@@ -407,4 +434,87 @@ fun MetricNameInputField(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VehicleColorDropdownMenu(
+    param: CustomParamState,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val isParamValueError = param.error != null
+
+    val selectedColor = param.value.toVehicleColorOrNull() ?: VehicleColor.CUSTOM_COLOR
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selectedColor.toDisplayName(),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.param_value)) },
+            modifier = Modifier
+                .menuAnchor(
+                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                    enabled = true
+                )
+                .fillMaxWidth(),
+            singleLine = true,
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            leadingIcon = {
+                ColorIndicator(color = selectedColor.toColor())
+            },
+            isError = isParamValueError,
+            supportingText = {
+                if (isParamValueError) {
+                    Text(text = param.error?.toDisplayMessage() ?: "")
+                }
+            },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            VehicleColor.entries.forEach { colorOption ->
+                DropdownMenuItem(
+                    text = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = colorOption.toDisplayName())
+                            ColorIndicator(color = colorOption.toColor())
+                        }
+                    },
+                    onClick = {
+                        onValueChange(colorOption.name)
+                        expanded = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ColorIndicator(color: Color, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(16.dp)
+            .clip(CircleShape)
+            .background(color)
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), CircleShape)
+    )
 }

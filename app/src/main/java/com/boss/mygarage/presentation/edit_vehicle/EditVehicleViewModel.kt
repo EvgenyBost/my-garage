@@ -2,8 +2,8 @@ package com.boss.mygarage.presentation.edit_vehicle
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.boss.mygarage.domain.model.StandardVehicleMetricType
 import com.boss.mygarage.domain.model.Vehicle
+import com.boss.mygarage.domain.model.VehicleMetricType
 import com.boss.mygarage.domain.model.VehicleType
 import com.boss.mygarage.domain.model.validate
 import com.boss.mygarage.domain.usecase.vehicle.GetVehicleByIdUseCase
@@ -69,7 +69,7 @@ class EditVehicleViewModel(
         markHasChanges()
     }
 
-    fun onParamNameChange(id: Long, newName: String, newType: StandardVehicleMetricType) {
+    fun onParamNameChange(id: Long, newName: String, newType: VehicleMetricType) {
         updateParam(id) { currentParam ->
             currentParam.copy(
                 name = newName,
@@ -122,7 +122,7 @@ class EditVehicleViewModel(
             type = state.type,
             description = state.description,
             metadata = state.customParams
-                .filter { it.name.isNotBlank() || it.type != StandardVehicleMetricType.CUSTOM }
+                .filter { it.name.isNotBlank() || it.type != VehicleMetricType.CUSTOM }
                 .map { param ->
                     param.toVehicleMetric()
                 }

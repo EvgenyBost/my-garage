@@ -60,4 +60,18 @@
     <string name="metric_validation_error_empty_value">Введите значение</string>
     <string name="metric_validation_error_invalid_format">Неверный формат</string>
 
+    //VehicalColor
+    <string name="color_black">Черный</string>
+    <string name="color_white">Белый</string>
+    <string name="color_red">Красный</string>
+    <string name="color_green">Зеленый</string>
+    <string name="color_blue">Синий</string>
+    <string name="color_yellow">Желтый</string>
+    <string name="color_cyan">Голубой</string>
+    <string name="color_magenta">Пурпурный</string>
+    <string name="color_gray">Серый</string>
+    <string name="color_lightgray">Светло-серый</string>
+    <string name="color_darkgray">Темно-серый</string>
+    <string name="color_custom">Свой цвет</string>
+
 </resources>

@@ -16,6 +16,7 @@ runtime = "1.10.6"
 material3 = "1.4.0"
 androidx-navigation = "2.8.5"
 navigationCompose = "2.9.7"
+foundation = "1.10.6"
 
 
 [libraries]
@@ -46,6 +47,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

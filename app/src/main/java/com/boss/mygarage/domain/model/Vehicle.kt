@@ -20,13 +20,29 @@ enum class VehicleType {
 }
 
 @Serializable
-enum class StandardVehicleMetricType {
+enum class VehicleMetricType {
     YEAR,
     MILEAGE,
     COLOR,
     LICENSE_PLATE,
     VIN,
     CUSTOM,
+}
+
+@Serializable
+enum class VehicleColor {
+    BLACK,
+    WHITE,
+    RED,
+    GREEN,
+    BLUE,
+    YELLOW,
+    CYAN,
+    MAGENTA,
+    GRAY,
+    DARK_GRAY,
+    LIGHT_GRAY,
+    CUSTOM_COLOR
 }
 
 enum class MetricValidationError {
@@ -37,23 +53,11 @@ enum class MetricValidationError {
 
 @Serializable
 data class VehicleMetric(
-    val type: StandardVehicleMetricType = StandardVehicleMetricType.CUSTOM,
+    val type: VehicleMetricType = VehicleMetricType.CUSTOM,
     val customName: String? = null,
     val value: String = "",
     val showOnMain: Boolean = false,
 )
-
-fun VehicleMetric.validate(): MetricValidationError? {
-    return when {
-        type == StandardVehicleMetricType.CUSTOM && customName.isNullOrBlank() -> MetricValidationError.EMPTY_NAME
-        value.isBlank() -> MetricValidationError.EMPTY_VALUE
-
-        ( type == StandardVehicleMetricType.YEAR || type == StandardVehicleMetricType.MILEAGE ) &&
-                 value.toLongOrNull() == null -> MetricValidationError.INVALID_FORMAT
-
-        else -> null
-    }
-}
 
 data class Vehicle(
     val id: Long,
