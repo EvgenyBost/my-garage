@@ -4,6 +4,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.boss.mygarage.domain.model.VehicleMetric
 import com.boss.mygarage.domain.model.VehicleMetricType.CUSTOM
 import com.boss.mygarage.domain.model.VehicleMetricType.MILEAGE
+import com.boss.mygarage.domain.model.VehicleMetricType.POWER
 import com.boss.mygarage.domain.model.VehicleMetricType.VIN
 import com.boss.mygarage.domain.model.VehicleMetricType.YEAR
 import com.boss.mygarage.presentation.edit_vehicle.CustomParamState
@@ -12,7 +13,7 @@ fun CustomParamState.getKeyboardTypeForMetric(): KeyboardType {
     val type = this.type
 
     return when {
-        this.type == MILEAGE || this.type == YEAR -> {
+        this.type in setOf(MILEAGE, YEAR, POWER) -> {
             KeyboardType.Number
         }
 

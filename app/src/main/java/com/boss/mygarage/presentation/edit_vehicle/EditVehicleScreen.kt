@@ -56,11 +56,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boss.mygarage.R
 import com.boss.mygarage.domain.model.MetricValidationError
 import com.boss.mygarage.domain.model.VehicleColor
-import com.boss.mygarage.domain.model.VehicleMetricType
 import com.boss.mygarage.domain.model.VehicleMetricType.COLOR
 import com.boss.mygarage.domain.model.VehicleMetricType.CUSTOM
 import com.boss.mygarage.domain.model.VehicleMetricType.LICENSE_PLATE
 import com.boss.mygarage.domain.model.VehicleMetricType.MILEAGE
+import com.boss.mygarage.domain.model.VehicleMetricType.POWER
 import com.boss.mygarage.domain.model.VehicleMetricType.VIN
 import com.boss.mygarage.domain.model.VehicleMetricType.YEAR
 import com.boss.mygarage.domain.model.VehicleMetricType.entries
@@ -147,6 +147,7 @@ fun EditVehicleScreen(
                     MILEAGE -> R.string.metric_type_mileage
                     COLOR -> R.string.metric_type_color
                     LICENSE_PLATE -> R.string.metric_type_license_plate
+                    POWER -> R.string.metric_type_power
                     VIN -> R.string.metric_type_vin
                     CUSTOM -> R.string.metric_type_custom
                 }

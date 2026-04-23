@@ -49,9 +49,10 @@
 
     //Standart Vehicle Metric types
     <string name="metric_type_year">Год выпуска</string>
-    <string name="metric_type_mileage">Пробег</string>
+    <string name="metric_type_mileage">Пробег, км</string>
     <string name="metric_type_color">Цвет</string>
     <string name="metric_type_license_plate">Гос. номер</string>
+    <string name="metric_type_power">Мощность, л.с.</string>
     <string name="metric_type_vin">VIN</string>
     <string name="metric_type_custom">Пользовательский параметр</string>
 

@@ -25,6 +25,7 @@ enum class VehicleMetricType {
     MILEAGE,
     COLOR,
     LICENSE_PLATE,
+    POWER,
     VIN,
     CUSTOM,
 }
