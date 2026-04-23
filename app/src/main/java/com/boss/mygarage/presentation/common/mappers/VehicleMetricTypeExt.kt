@@ -12,11 +12,13 @@ import com.boss.mygarage.domain.model.VehicleMetricType.VIN
 import com.boss.mygarage.domain.model.VehicleMetricType.YEAR
 
 @Composable
-fun VehicleMetricType.toDisplayName(): String = when (this) {
-    YEAR -> stringResource(R.string.metric_type_year)
-    MILEAGE -> stringResource(R.string.metric_type_mileage)
-    COLOR -> stringResource(R.string.metric_type_color)
-    LICENSE_PLATE -> stringResource(R.string.metric_type_license_plate)
-    VIN -> stringResource(R.string.metric_type_vin)
-    CUSTOM -> stringResource(R.string.metric_type_custom)
+fun VehicleMetricType.toDisplayName(): String = stringResource(this.toResId())
+
+fun VehicleMetricType.toResId(): Int = when (this) {
+    YEAR -> R.string.metric_type_year
+    MILEAGE -> R.string.metric_type_mileage
+    COLOR -> R.string.metric_type_color
+    LICENSE_PLATE -> R.string.metric_type_license_plate
+    VIN -> R.string.metric_type_vin
+    CUSTOM -> R.string.metric_type_custom
 }

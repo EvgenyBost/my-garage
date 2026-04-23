@@ -59,29 +59,7 @@ fun VehicleItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 1. Icon
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                val selectedColor = vehicle.getColorMetric()?.value?.toVehicleColorOrNull()
-                    ?: VehicleColor.CUSTOM_COLOR
-
-                Icon(
-                    imageVector = vehicle.type.toIcon(),
-                    contentDescription = null,
-                    tint = Color.Black.copy(alpha = 0.3f),
-                    modifier = Modifier
-                        .offset(x = 1.5.dp, y = 1.5.dp)
-                )
-
-                Icon(
-                    imageVector = vehicle.type.toIcon(),
-                    contentDescription = null,
-                    tint = selectedColor.toColor(),
-                )
-            }
+            VehicleIconBox(vehicle)
 
             Spacer(modifier = Modifier.width(16.dp))
 

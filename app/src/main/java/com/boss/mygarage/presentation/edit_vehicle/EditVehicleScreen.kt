@@ -49,7 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -71,6 +70,7 @@ import com.boss.mygarage.presentation.common.mappers.toDisplayMessage
 import com.boss.mygarage.presentation.common.mappers.toDisplayName
 import com.boss.mygarage.presentation.common.mappers.toVehicleColorOrNull
 import com.boss.mygarage.presentation.common.utils.getKeyboardTypeForMetric
+import com.boss.mygarage.presentation.main.components.VehicleIconBoxWithoutBackground
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,21 +140,17 @@ fun EditVehicleScreen(
         }
     ) { innerPadding ->
 
-        val context = LocalContext.current
-
-        val paramNameToTypeMap = remember(context) {
-            entries.associateBy { type ->
-                context.getString(
-                    when (type) {
-                        YEAR -> R.string.metric_type_year
-                        MILEAGE -> R.string.metric_type_mileage
-                        COLOR -> R.string.metric_type_color
-                        LICENSE_PLATE -> R.string.metric_type_license_plate
-                        VIN -> R.string.metric_type_vin
-                        CUSTOM -> R.string.metric_type_custom
-                    }
-                )
-            }
+        val paramNameToTypeMap = entries.associateBy { type ->
+            stringResource(
+                when (type) {
+                    YEAR -> R.string.metric_type_year
+                    MILEAGE -> R.string.metric_type_mileage
+                    COLOR -> R.string.metric_type_color
+                    LICENSE_PLATE -> R.string.metric_type_license_plate
+                    VIN -> R.string.metric_type_vin
+                    CUSTOM -> R.string.metric_type_custom
+                }
+            )
         }
 
         LazyColumn(
@@ -189,6 +185,9 @@ fun EditVehicleScreen(
                         label = { Text(stringResource(R.string.field_type)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        leadingIcon = {
+                            VehicleIconBoxWithoutBackground(uiState.type)
+                        },
                         modifier = Modifier
                             .menuAnchor(
                                 type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
@@ -203,7 +202,16 @@ fun EditVehicleScreen(
                     ) {
                         VehicleType.entries.forEach { type ->
                             DropdownMenuItem(
-                                text = { Text(text = type.toDisplayName()) },
+                                text = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(text = type.toDisplayName())
+                                        VehicleIconBoxWithoutBackground(type)
+                                    }
+                                },
                                 onClick = {
                                     viewModel.onTypeChange(type)
                                     expanded = false
@@ -377,7 +385,7 @@ fun MetricNameInputField(
 
     // Get all standard param names (except CUSTOM)
     val standardNames = entries
-        .filter { it != VehicleMetricType.CUSTOM }
+        .filter { it != CUSTOM }
         .map { it.toDisplayName() }
 
     val isParamNameError = error == MetricValidationError.EMPTY_NAME
@@ -474,7 +482,7 @@ fun VehicleColorDropdownMenu(
             isError = isParamValueError,
             supportingText = {
                 if (isParamValueError) {
-                    Text(text = param.error?.toDisplayMessage() ?: "")
+                    Text(text = param.error.toDisplayMessage())
                 }
             },
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
