@@ -9,6 +9,7 @@ import com.boss.mygarage.domain.model.VehicleMetricType.CUSTOM
 import com.boss.mygarage.domain.model.VehicleMetricType.LICENSE_PLATE
 import com.boss.mygarage.domain.model.VehicleMetricType.MILEAGE
 import com.boss.mygarage.domain.model.VehicleMetricType.VIN
+import com.boss.mygarage.domain.model.VehicleMetricType.INSURANCE_EXPIRED
 import com.boss.mygarage.domain.model.VehicleMetricType.YEAR
 import com.boss.mygarage.domain.model.VehicleMetricType.POWER
 
@@ -22,5 +23,6 @@ fun VehicleMetricType.toResId(): Int = when (this) {
     LICENSE_PLATE -> R.string.metric_type_license_plate
     POWER -> R.string.metric_type_power
     VIN -> R.string.metric_type_vin
+    INSURANCE_EXPIRED -> R.string.metric_type_insurance_expires
     CUSTOM -> R.string.metric_type_custom
 }

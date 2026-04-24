@@ -3,6 +3,7 @@ package com.boss.mygarage.presentation.edit_vehicle
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,11 +23,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -36,10 +40,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +64,7 @@ import com.boss.mygarage.domain.model.VehicleColor
 import com.boss.mygarage.domain.model.VehicleMetricType
 import com.boss.mygarage.domain.model.VehicleMetricType.COLOR
 import com.boss.mygarage.domain.model.VehicleMetricType.CUSTOM
+import com.boss.mygarage.domain.model.VehicleMetricType.INSURANCE_EXPIRED
 import com.boss.mygarage.domain.model.VehicleMetricType.LICENSE_PLATE
 import com.boss.mygarage.domain.model.VehicleMetricType.MILEAGE
 import com.boss.mygarage.domain.model.VehicleMetricType.POWER
@@ -71,7 +78,10 @@ import com.boss.mygarage.presentation.common.mappers.toDisplayMessage
 import com.boss.mygarage.presentation.common.mappers.toDisplayName
 import com.boss.mygarage.presentation.common.mappers.toVehicleColorOrNull
 import com.boss.mygarage.presentation.common.utils.capitalizeFirstSymbol
+import com.boss.mygarage.presentation.common.utils.convertMillisToDate
 import com.boss.mygarage.presentation.common.utils.getKeyboardTypeForMetric
+import com.boss.mygarage.presentation.common.utils.getTodayDate
+import com.boss.mygarage.presentation.common.utils.isDate
 import com.boss.mygarage.presentation.main.components.VehicleIconBoxWithoutBackground
 import org.koin.androidx.compose.koinViewModel
 
@@ -151,6 +161,7 @@ fun EditVehicleScreen(
                     LICENSE_PLATE -> R.string.metric_type_license_plate
                     POWER -> R.string.metric_type_power
                     VIN -> R.string.metric_type_vin
+                    INSURANCE_EXPIRED -> R.string.metric_type_insurance_expires
                     CUSTOM -> R.string.metric_type_custom
                 }
             )
@@ -280,7 +291,7 @@ fun EditVehicleScreen(
 @Composable
 fun CustomParamCell(
     modifier: Modifier = Modifier,
-    param: CustomParamState, // Help data class for UI
+    param: CustomParamState,
     onNameChange: (String) -> Unit,
     onValueChange: (String) -> Unit,
     onShowOnMainChange: (Boolean) -> Unit,
@@ -318,31 +329,39 @@ fun CustomParamCell(
                         param.error == VehicleValidationError.INVALID_PARAM_FORMAT
                                 || param.error == VehicleValidationError.EMPTY_PARAM_VALUE))
 
-                if (param.type == COLOR) {
-                    VehicleColorDropdownMenu(
+                when (param.type) {
+                    COLOR -> VehicleColorDropdownMenu(
                         param = param,
                         onValueChange = onValueChange,
                         modifier = Modifier.weight(1f),
                     )
-                } else {
-                    OutlinedTextField(
-                        value = param.value,
-                        onValueChange = onValueChange,
-                        label = { Text(stringResource(R.string.param_value)) },
+
+                    INSURANCE_EXPIRED -> ParamValueDatePicker(
                         modifier = Modifier.weight(1f),
-                        singleLine = true,
-                        maxLines = 1,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = param.getKeyboardTypeForMetric(),
-                            imeAction = ImeAction.Done
-                        ),
-                        isError = isParamValueError,
-                        supportingText = {
-                            if (isParamValueError) {
-                                Text(text = param.error.toDisplayMessage())
-                            }
-                        }
+                        param = param,
+                        isParamValueError = isParamValueError,
+                        onValueChange = onValueChange
                     )
+
+                    else ->
+                        OutlinedTextField(
+                            value = param.value,
+                            onValueChange = onValueChange,
+                            label = { Text(stringResource(R.string.param_value)) },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            maxLines = 1,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = param.getKeyboardTypeForMetric(),
+                                imeAction = ImeAction.Done
+                            ),
+                            isError = isParamValueError,
+                            supportingText = {
+                                if (isParamValueError) {
+                                    Text(text = param.error.toDisplayMessage())
+                                }
+                            }
+                        )
                 }
 
             }
@@ -545,5 +564,74 @@ fun ColorIndicator(color: Color, modifier: Modifier = Modifier) {
             .clip(CircleShape)
             .background(color)
             .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), CircleShape)
+    )
+}
+
+@Composable
+fun ParamValueDatePicker(
+    modifier: Modifier = Modifier,
+    param: CustomParamState,
+    isParamValueError: Boolean,
+    onValueChange: (String) -> Unit,
+) {
+    val datePickerState = rememberDatePickerState()
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val selectedDate = datePickerState.selectedDateMillis
+                    if (selectedDate != null) {
+                        val formattedDate = convertMillisToDate(selectedDate)
+                        onValueChange(formattedDate)
+                    }
+                    showDatePicker = false
+                }) { Text(stringResource(R.string.ok_button_title)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDatePicker = false
+                }) { Text(stringResource(R.string.cancel_button_title)) }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    val correctDateValue: String
+    if (param.value.isDate()) correctDateValue = param.value
+    else {
+        correctDateValue = getTodayDate()
+        onValueChange(correctDateValue)
+    }
+
+    OutlinedTextField(
+        value = correctDateValue,
+        onValueChange = { },
+        readOnly = true,
+        label = { Text(stringResource(R.string.param_value)) },
+        modifier = modifier.clickable { showDatePicker = true },
+        colors = OutlinedTextFieldDefaults.colors(
+            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+            disabledBorderColor = MaterialTheme.colorScheme.outline,
+            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        singleLine = true,
+        isError = isParamValueError,
+        supportingText = {
+            if (isParamValueError) {
+                Text(text = param.error?.toDisplayMessage() ?: "")
+            }
+        },
+        trailingIcon = {
+            IconButton(onClick = { showDatePicker = true }) {
+                Icon(
+                    Icons.Default.DateRange,
+                    contentDescription = stringResource(R.string.select_date_title)
+                )
+            }
+        }
     )
 }

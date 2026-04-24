@@ -9,6 +9,7 @@ import com.boss.mygarage.domain.model.VehicleValidationError
 import com.boss.mygarage.domain.model.validate
 import com.boss.mygarage.domain.usecase.vehicle.GetVehicleByIdUseCase
 import com.boss.mygarage.domain.usecase.vehicle.SaveVehicleUseCase
+import com.boss.mygarage.presentation.common.utils.isDate
 import com.boss.mygarage.presentation.common.utils.toCustomParamState
 import com.boss.mygarage.presentation.common.utils.toVehicleMetric
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -77,8 +78,12 @@ class EditVehicleViewModel(
         newType: VehicleMetricType,
         oldType: VehicleMetricType
     ) {
-        val needToClearValue =
-            (oldType == VehicleMetricType.COLOR && newType != VehicleMetricType.COLOR)
+        val typesToClear = setOf(
+            VehicleMetricType.COLOR,
+            VehicleMetricType.INSURANCE_EXPIRED
+        )
+
+        val needToClearValue = oldType in typesToClear && newType != oldType
 
         updateParam(id) { currentParam ->
             currentParam.copy(
@@ -153,7 +158,11 @@ class EditVehicleViewModel(
         var firstErrorIndex: Int? = null
 
         val validatedParams = params.mapIndexed { index, param ->
-            val errorType = param.toVehicleMetric().validate()
+            val errorType = if (param.type == VehicleMetricType.INSURANCE_EXPIRED && !param.value.isDate()){
+                VehicleValidationError.INVALID_PARAM_FORMAT
+            } else {
+                param.toVehicleMetric().validate()
+            }
 
             if (errorType != null && firstErrorIndex == null) {
                 firstErrorIndex = index

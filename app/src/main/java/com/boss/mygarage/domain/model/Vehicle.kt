@@ -27,6 +27,7 @@ enum class VehicleMetricType {
     LICENSE_PLATE,
     POWER,
     VIN,
+    INSURANCE_EXPIRED,
     CUSTOM,
 }
 

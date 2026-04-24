@@ -14,7 +14,9 @@ fun VehicleMetric.validate(): VehicleValidationError? {
         (type in setOf(YEAR, MILEAGE, POWER)) &&
                 value.toLongOrNull() == null -> VehicleValidationError.INVALID_PARAM_FORMAT
 
-        (type == COLOR && !VehicleColor.entries.any { it.name.equals(value, ignoreCase = true) }) -> VehicleValidationError.INVALID_PARAM_FORMAT
+        (type == COLOR && !VehicleColor.entries.any {
+            it.name.equals(value, ignoreCase = true)
+        }) -> VehicleValidationError.INVALID_PARAM_FORMAT
 
         else -> null
     }

@@ -18,6 +18,7 @@
     <string name="param_value">Значение</string>
     <string name="show_on_main">На главный экран</string>
     <string name="add_param_button">Добавить параметр</string>
+    <string name="ok_button_title">Ок</string>
     <string name="cancel_button_description">Отмена</string>
     <string name="cancel_button_title">Отмена</string>
 
@@ -30,6 +31,8 @@
     <string name="delete_button_title">Удалить</string>>
     <string name="delete_parameter_alert_title">Удалить параметр?</string>>
     <string name="delete_parameter_alert_details">Это действие нельзя будет отменить после сохранения.</string>>
+
+    <string name="select_date_title">Выберите дату</string>
 
 
     //Transport types
@@ -54,6 +57,7 @@
     <string name="metric_type_license_plate">Гос. номер</string>
     <string name="metric_type_power">Мощность, л.с.</string>
     <string name="metric_type_vin">VIN</string>
+    <string name="metric_type_insurance_expires">Страховка до</string>
     <string name="metric_type_custom">Пользовательский параметр</string>
 
     //VehicleValidationError descriptions
