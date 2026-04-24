@@ -71,11 +71,20 @@ class EditVehicleViewModel(
         markHasChanges()
     }
 
-    fun onParamNameChange(id: Long, newName: String, newType: VehicleMetricType) {
+    fun onParamNameChange(
+        id: Long,
+        newName: String,
+        newType: VehicleMetricType,
+        oldType: VehicleMetricType
+    ) {
+        val needToClearValue =
+            (oldType == VehicleMetricType.COLOR && newType != VehicleMetricType.COLOR)
+
         updateParam(id) { currentParam ->
             currentParam.copy(
                 name = newName,
                 type = newType,
+                value = if (needToClearValue) "" else currentParam.value,
                 error = null
             )
         }

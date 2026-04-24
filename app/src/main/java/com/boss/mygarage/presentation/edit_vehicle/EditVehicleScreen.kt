@@ -54,8 +54,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boss.mygarage.R
-import com.boss.mygarage.domain.model.VehicleValidationError
 import com.boss.mygarage.domain.model.VehicleColor
+import com.boss.mygarage.domain.model.VehicleMetricType
 import com.boss.mygarage.domain.model.VehicleMetricType.COLOR
 import com.boss.mygarage.domain.model.VehicleMetricType.CUSTOM
 import com.boss.mygarage.domain.model.VehicleMetricType.LICENSE_PLATE
@@ -65,10 +65,12 @@ import com.boss.mygarage.domain.model.VehicleMetricType.VIN
 import com.boss.mygarage.domain.model.VehicleMetricType.YEAR
 import com.boss.mygarage.domain.model.VehicleMetricType.entries
 import com.boss.mygarage.domain.model.VehicleType
+import com.boss.mygarage.domain.model.VehicleValidationError
 import com.boss.mygarage.presentation.common.mappers.toColor
 import com.boss.mygarage.presentation.common.mappers.toDisplayMessage
 import com.boss.mygarage.presentation.common.mappers.toDisplayName
 import com.boss.mygarage.presentation.common.mappers.toVehicleColorOrNull
+import com.boss.mygarage.presentation.common.utils.capitalizeFirstSymbol
 import com.boss.mygarage.presentation.common.utils.getKeyboardTypeForMetric
 import com.boss.mygarage.presentation.main.components.VehicleIconBoxWithoutBackground
 import org.koin.androidx.compose.koinViewModel
@@ -163,7 +165,8 @@ fun EditVehicleScreen(
         ) {
             // Main field
             item {
-                val isParamNameError = (uiState.error != null && uiState.error == VehicleValidationError.EMPTY_VEHICLE_NAME)
+                val isParamNameError =
+                    (uiState.error != null && uiState.error == VehicleValidationError.EMPTY_VEHICLE_NAME)
 
                 OutlinedTextField(
                     value = uiState.name,
@@ -172,7 +175,7 @@ fun EditVehicleScreen(
                     modifier = Modifier.fillMaxWidth(),
                     isError = isParamNameError,
                     supportingText = {
-                        Text(text = uiState.error?.toDisplayMessage()?:"")
+                        Text(text = uiState.error?.toDisplayMessage() ?: "")
                     }
                 )
             }
@@ -237,6 +240,8 @@ fun EditVehicleScreen(
                 )
             }
 
+            val alreadyExistsParams = uiState.customParams.map { it.type }.toSet()
+
             // Dynamic list with custom params
             items(
                 items = uiState.customParams,
@@ -245,12 +250,16 @@ fun EditVehicleScreen(
                     modifier = Modifier.animateItem(),
                     param = param,
                     onNameChange = { newName ->
-                        val newType = paramNameToTypeMap[newName.trim()] ?: CUSTOM
-                        viewModel.onParamNameChange(param.id, newName, newType)
+                        // if User enter "cOlOR" -> Save as "Color"
+                        val correctName = capitalizeFirstSymbol(newName)
+                        val newType = paramNameToTypeMap[correctName.trim()] ?: CUSTOM
+
+                        viewModel.onParamNameChange(param.id, correctName, newType, param.type)
                     },
                     onValueChange = { newVal -> viewModel.onParamValueChange(param.id, newVal) },
                     onShowOnMainChange = { show -> viewModel.onParamShowChange(param.id, show) },
                     onDeleteConfirm = { viewModel.onParamDelete(param.id) },
+                    existingParams = alreadyExistsParams,
                 )
             }
 
@@ -276,6 +285,7 @@ fun CustomParamCell(
     onValueChange: (String) -> Unit,
     onShowOnMainChange: (Boolean) -> Unit,
     onDeleteConfirm: () -> Unit,
+    existingParams: Set<VehicleMetricType>,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -292,13 +302,16 @@ fun CustomParamCell(
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val paramName = if (param.type == CUSTOM) param.name else param.type.toDisplayName()
+                var paramName = if (param.type == CUSTOM) param.name else param.type.toDisplayName()
+                if (param.name.trim() == paramName) paramName =
+                    param.name //when User need to enter ex. "Color of wheels"
 
                 MetricNameInputField(
                     value = paramName,
                     onValueChange = onNameChange,
                     modifier = Modifier.weight(1f),
-                    error = param.error
+                    error = param.error,
+                    existingParams = existingParams
                 )
 
                 val isParamValueError = (isError && (
@@ -385,14 +398,15 @@ fun MetricNameInputField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
+    existingParams: Set<VehicleMetricType>,
     error: VehicleValidationError?
 
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    // Get all standard param names (except CUSTOM)
+    // Get all standard param names (except CUSTOM and already exist params)
     val standardNames = entries
-        .filter { it != CUSTOM }
+        .filter { it != CUSTOM && it !in existingParams }
         .map { it.toDisplayName() }
 
     val isParamNameError = error == VehicleValidationError.EMPTY_PARAM_NAME

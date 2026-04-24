@@ -12,12 +12,12 @@ import com.boss.mygarage.presentation.edit_vehicle.CustomParamState
 fun CustomParamState.getKeyboardTypeForMetric(): KeyboardType {
     val type = this.type
 
-    return when {
-        this.type in setOf(MILEAGE, YEAR, POWER) -> {
+    return when (this.type) {
+        in setOf(MILEAGE, YEAR, POWER) -> {
             KeyboardType.Number
         }
 
-        this.type == VIN -> {
+        VIN -> {
             KeyboardType.Ascii
         }
 
@@ -42,4 +42,11 @@ fun VehicleMetric.toCustomParamState(): CustomParamState {
         showOnMain = this.showOnMain,
         error = null
     )
+}
+
+fun capitalizeFirstSymbol(input: String): String {
+    if (input.isBlank()) return ""
+    return input.lowercase().replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase() else it.toString()
+    }
 }
