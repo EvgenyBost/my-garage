@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -82,6 +81,7 @@ import com.boss.mygarage.presentation.common.utils.convertMillisToDate
 import com.boss.mygarage.presentation.common.utils.getKeyboardTypeForMetric
 import com.boss.mygarage.presentation.common.utils.getTodayDate
 import com.boss.mygarage.presentation.common.utils.isDate
+import com.boss.mygarage.presentation.main.components.SwipeToDeleteContainer
 import com.boss.mygarage.presentation.main.components.VehicleIconBoxWithoutBackground
 import org.koin.androidx.compose.koinViewModel
 
@@ -298,117 +298,96 @@ fun CustomParamCell(
     onDeleteConfirm: () -> Unit,
     existingParams: Set<VehicleMetricType>,
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    SwipeToDeleteContainer(
+        deleteDialogTitle = stringResource(R.string.delete_parameter_alert_title),
+        deleteDialogText = stringResource(R.string.delete_parameter_alert_details),
+        onDeleteClick = onDeleteConfirm,
+        content = {
+            val isError = param.error != null
 
-    val isError = param.error != null
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isError)
-                MaterialTheme.colorScheme.errorContainer
-            else
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
-    ) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                var paramName = if (param.type == CUSTOM) param.name else param.type.toDisplayName()
-                if (param.name.trim() == paramName) paramName =
-                    param.name //when User need to enter ex. "Color of wheels"
-
-                MetricNameInputField(
-                    value = paramName,
-                    onValueChange = onNameChange,
-                    modifier = Modifier.weight(1f),
-                    error = param.error,
-                    existingParams = existingParams
+            Card(
+                modifier = modifier.fillMaxWidth(),
+                shape = CardDefaults.shape,
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isError)
+                        MaterialTheme.colorScheme.errorContainer
+                    else
+                        MaterialTheme.colorScheme.surfaceVariant
                 )
-
-                val isParamValueError = (isError && (
-                        param.error == VehicleValidationError.INVALID_PARAM_FORMAT
-                                || param.error == VehicleValidationError.EMPTY_PARAM_VALUE))
-
-                when (param.type) {
-                    COLOR -> VehicleColorDropdownMenu(
-                        param = param,
-                        onValueChange = onValueChange,
-                        modifier = Modifier.weight(1f),
-                    )
-
-                    INSURANCE_EXPIRED -> ParamValueDatePicker(
-                        modifier = Modifier.weight(1f),
-                        param = param,
-                        isParamValueError = isParamValueError,
-                        onValueChange = onValueChange
-                    )
-
-                    else ->
-                        OutlinedTextField(
-                            value = param.value,
-                            onValueChange = onValueChange,
-                            label = { Text(stringResource(R.string.param_value)) },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true,
-                            maxLines = 1,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = param.getKeyboardTypeForMetric(),
-                                imeAction = ImeAction.Done
-                            ),
-                            isError = isParamValueError,
-                            supportingText = {
-                                if (isParamValueError) {
-                                    Text(text = param.error.toDisplayMessage())
-                                }
-                            }
-                        )
-                }
-
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
             ) {
-                Checkbox(checked = param.showOnMain, onCheckedChange = onShowOnMainChange)
-                Text(
-                    text = stringResource(R.string.show_on_main),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.weight(1f)
-                )
-                IconButton(onClick = { showDeleteDialog = true }) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.delete_button_description),
-                        tint = MaterialTheme.colorScheme.error
-                    )
+                Column(modifier = Modifier.padding(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        var paramName =
+                            if (param.type == CUSTOM) param.name else param.type.toDisplayName()
+                        if (param.name.trim() == paramName) paramName =
+                            param.name //when User need to enter ex. "Color of wheels"
+
+                        MetricNameInputField(
+                            value = paramName,
+                            onValueChange = onNameChange,
+                            modifier = Modifier.weight(1f),
+                            error = param.error,
+                            existingParams = existingParams
+                        )
+
+                        val isParamValueError = (isError && (
+                                param.error == VehicleValidationError.INVALID_PARAM_FORMAT
+                                        || param.error == VehicleValidationError.EMPTY_PARAM_VALUE))
+
+                        when (param.type) {
+                            COLOR -> VehicleColorDropdownMenu(
+                                param = param,
+                                onValueChange = onValueChange,
+                                modifier = Modifier.weight(1f),
+                            )
+
+                            INSURANCE_EXPIRED -> ParamValueDatePicker(
+                                modifier = Modifier.weight(1f),
+                                param = param,
+                                isParamValueError = isParamValueError,
+                                onValueChange = onValueChange
+                            )
+
+                            else ->
+                                OutlinedTextField(
+                                    value = param.value,
+                                    onValueChange = onValueChange,
+                                    label = { Text(stringResource(R.string.param_value)) },
+                                    modifier = Modifier.weight(1f),
+                                    singleLine = true,
+                                    maxLines = 1,
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = param.getKeyboardTypeForMetric(),
+                                        imeAction = ImeAction.Done
+                                    ),
+                                    isError = isParamValueError,
+                                    supportingText = {
+                                        if (isParamValueError) {
+                                            Text(text = param.error.toDisplayMessage())
+                                        }
+                                    }
+                                )
+                        }
+
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Checkbox(checked = param.showOnMain, onCheckedChange = onShowOnMainChange)
+                        Text(
+                            text = stringResource(R.string.show_on_main),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }
+    );
 
-        if (showDeleteDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteDialog = false },
-                title = { Text(stringResource(R.string.delete_parameter_alert_title)) },
-                text = { Text(stringResource(R.string.delete_parameter_alert_details)) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        onDeleteConfirm()
-                        showDeleteDialog = false
-                    }) {
-                        Text(
-                            stringResource(R.string.delete_button_title),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showDeleteDialog = false }) {
-                        Text(stringResource(R.string.cancel_button_title))
-                    }
-                }
-            )
-        }
-    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

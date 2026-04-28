@@ -52,6 +52,7 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     onAddClick: () -> Unit,
     onEditClick: (Long) -> Unit,
+    onDeleteClick: (Long) -> Unit,
     viewModel: MainViewModel = koinViewModel(),
 ) {
     val vehicles by viewModel.uiState.collectAsStateWithLifecycle()
@@ -84,6 +85,7 @@ fun MainScreen(
                 VehicleItem(
                     vehicle = vehicle,
                     onEditClick = { onEditClick(vehicle.id) },
+                    onDeleteClick = { onDeleteClick(vehicle.id) },
                     onCardClick = {},
                 )
             }

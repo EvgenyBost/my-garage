@@ -8,4 +8,5 @@ interface VehicleRepository {
     suspend fun getVehicleById(id: Long): Vehicle?
     suspend fun saveVehicle(vehicle: Vehicle)
     suspend fun deleteVehicle(vehicle: Vehicle)
+    suspend fun deleteVehicleById(id: Long)
 }

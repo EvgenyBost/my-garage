@@ -5,7 +5,10 @@
     <string name="main_screen_title">Мой гараж</string>
     <string name="add_vehicle_content_description">Добавить транспорт</string>
     <string name="edit_vehicle_content_description">Изменить</string>
-    <string name="vehicle_year">Год: %1$d</string>
+    <string name="delete_vehicle_content_description">Удалить</string>
+
+    <string name="delete_vehicle_alert_title">Удалить транспорт?</string>>
+    <string name="delete_vehicle_alert_text">Это действие нельзя будет отменить.</string>>
 
     //Edit Vehicle Screen
     <string name="add_vehicle_title">Добавить транспорт</string>

@@ -29,4 +29,8 @@ class VehicleRepositoryImpl(
     override suspend fun deleteVehicle(vehicle: Vehicle) {
         vehicleDao.deleteVehicle(vehicle.toEntity())
     }
+
+    override suspend fun deleteVehicleById(id: Long) {
+        vehicleDao.deleteVehicleById(id)
+    }
 }

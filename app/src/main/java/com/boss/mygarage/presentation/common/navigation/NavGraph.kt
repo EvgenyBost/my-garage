@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.boss.mygarage.presentation.edit_vehicle.EditVehicleScreen
 import com.boss.mygarage.presentation.main.MainScreen
+import com.boss.mygarage.presentation.main.MainViewModel
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -23,6 +24,8 @@ fun NavGraph(
     ) {
         // Main Screen
         composable<Screen.Main> {
+            val viewModel: MainViewModel = koinViewModel()
+
             MainScreen(
                 onAddClick = {
                     navController.navigate(Screen.EditVehicle(null))
@@ -30,6 +33,9 @@ fun NavGraph(
                 onEditClick = { vehicleId ->
                     navController.navigate(Screen.EditVehicle(vehicleId))
                 },
+                onDeleteClick = { vehicleId ->
+                    viewModel.deleteVehicle(vehicleId)
+                }
             )
         }
 

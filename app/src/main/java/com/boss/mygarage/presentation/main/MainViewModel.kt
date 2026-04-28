@@ -10,6 +10,7 @@ import com.boss.mygarage.domain.usecase.vehicle.SaveVehicleUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class MainViewModel(
     private val getAllVehiclesUseCase: GetAllVehiclesUseCase,
@@ -29,11 +30,14 @@ class MainViewModel(
             initialValue = emptyList()
         )
 
+    fun deleteVehicle(vehicleId: Long) {
+        viewModelScope.launch {
+            deleteVehicleUseCase(vehicleId)
+        }
+    }
+
 //    fun onEditClick(vehicleId: Long) {
 //        // Show details screen
 //    }
 
-    fun onVehicleClick(vehicle: Vehicle) {
-        // Show details screen
-    }
 }
